@@ -7,7 +7,7 @@ import (
 )
 
 func TestGETPage(t *testing.T) {
-	t.Run("Returns the Home page", func(t *testing.T) {
+	t.Run("returns the Home page", func(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/", nil)
 		response := httptest.NewRecorder()
 
@@ -21,7 +21,7 @@ func TestGETPage(t *testing.T) {
 		}
 	})
 
-	t.Run("Returns the Projects page", func(t *testing.T) {
+	t.Run("returns the Projects page", func(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/projects", nil)
 		response := httptest.NewRecorder()
 
@@ -34,4 +34,19 @@ func TestGETPage(t *testing.T) {
 			t.Errorf("got '%s', want '%s'", got, want)
 		}
 	})
+
+	t.Run("return custom 404", func(t *testing.T) {
+		request, _ := http.NewRequest(http.MethodGet, "/asidhffsd", nil)
+		response := httptest.NewRecorder()
+
+		notFoundHandler(response, request)
+
+		got := response.Body.String()
+		want := "<h1>Page Not Found</h1>"
+
+		if got != want {
+			t.Errorf("got '%s', want '%s'", got, want)
+		}
+	})
+
 }
