@@ -3,8 +3,11 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/mux"
+	newrelic "github.com/newrelic/go-agent"
+	nrgorilla "github.com/newrelic/go-agent/_integrations/nrgorilla/v1"
 )
 
 func home(w http.ResponseWriter, r *http.Request) {
@@ -22,6 +25,14 @@ func notFoundHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	//Config New Relic
+	cfg := newrelic.NewConfig("alexmcosta.com", getNREnv())
+	cfg.Logger = newrelic.NewDebugLogger(os.Stdout)
+	app, err := newrelic.NewApplication(cfg)
+	if nil != err {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 
 	//Define router
 	r := mux.NewRouter()
@@ -32,5 +43,5 @@ func main() {
 
 	r.HandleFunc("/", home)
 	r.HandleFunc("/projects", projects)
-	http.ListenAndServe(":3000", r)
+	http.ListenAndServe(":3000", nrgorilla.InstrumentRoutes(r, app))
 }
