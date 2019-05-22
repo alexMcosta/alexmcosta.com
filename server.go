@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"html/template"
 	"net/http"
 	"os"
 
@@ -10,9 +11,13 @@ import (
 	nrgorilla "github.com/newrelic/go-agent/_integrations/nrgorilla/v1"
 )
 
+var homeTemplate *template.Template
+
 func home(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
-	fmt.Fprint(w, "<h1>Hello World!</h1>")
+	if err := homeTemplate.Execute(w, nil); err != nil {
+		panic(err)
+	}
 }
 
 func projects(w http.ResponseWriter, r *http.Request) {
@@ -32,6 +37,14 @@ func main() {
 	if nil != err {
 		fmt.Println(err)
 		os.Exit(1)
+	}
+
+	//Templates
+	homeTemplate, err = template.ParseFiles(
+		"views/home.gohtml",
+		"views/footer.gohtml")
+	if err != nil {
+		panic(err)
 	}
 
 	//Define router
